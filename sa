@@ -1,0 +1,22 @@
+#!/bin/sh
+
+sudo sh -c "echo 0 > /sys/class/rtc/rtc0/wakealarm"
+SPEC=$1
+if [ $SPEC = 'previous' ]; then
+    SPEC=`cat ~/.config/lalarm-previous`
+else
+    echo $SPEC > ~/.config/lalarm-previous
+fi
+TIME=`next-time $SPEC`
+
+if [ ! $? ]; then
+    echo $TIME
+    exit 1
+fi
+
+echo Alarm set to `date -d @$TIME`
+
+xset s off s noblank dpms 0 0 0 -dpms
+
+echo $TIME > /tmp/lalarm-time
+sudo sh -c "echo $TIME > /sys/class/rtc/rtc0/wakealarm"
